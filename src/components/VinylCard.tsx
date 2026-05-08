@@ -3,12 +3,17 @@ import type { Album } from "@/types/album";
 
 type VinylCardProps = {
   album: Album;
+  isSelected?: boolean;
 };
 
-export default function VinylCard({ album }: VinylCardProps) {
+export default function VinylCard({ album, isSelected }: VinylCardProps) {
   return (
     <div className="group cursor-pointer">
-      <div className="relative aspect-square overflow-hidden rounded-md bg-neutral-200 shadow-md transition duration-300 group-hover:-translate-y-2 group-hover:shadow-xl">
+      <div
+        className={`relative aspect-square overflow-hidden rounded-md bg-neutral-200 shadow-md transition duration-300 group-hover:-translate-y-2 group-hover:shadow-xl ${
+          isSelected ? "ring-2 ring-white ring-offset-2 ring-offset-[#8b5e3c]" : ""
+        }`}
+      >
         <Image
           src={album.coverImage}
           alt={album.title}
