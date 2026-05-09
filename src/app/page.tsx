@@ -1,13 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import VinylShelf from "@/components/VinylShelf";
 import { albums } from "@/data/albums";
 import type { Album } from "@/types/album";
 
+type SortOption = "default" | "title" | "artist" | "year";
+
 export default function Home() {
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("default");
+
+  const filteredAlbums = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) return albums;
+
+    return albums.filter((album) => {
+      return (
+        album.title.toLowerCase().includes(query) ||
+        album.artist.toLowerCase().includes(query) ||
+        album.genre.some((genre) => genre.toLowerCase().includes(query))
+      );
+    });
+  }, [searchQuery]);
+
+  const sortedAlbums = useMemo(() => {
+    const copiedAlbums = [...filteredAlbums];
+
+    if (sortOption === "title") {
+      return copiedAlbums.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    if (sortOption === "artist") {
+      return copiedAlbums.sort((a, b) => a.artist.localeCompare(b.artist));
+    }
+
+    if (sortOption === "year") {
+      return copiedAlbums.sort((a, b) => a.year - b.year);
+    }
+
+    return copiedAlbums;
+  }, [filteredAlbums, sortOption]);
 
   return (
     <main className="min-h-screen bg-[#f5efe6] px-6 py-10">
@@ -24,6 +60,33 @@ export default function Home() {
           </p>
         </div>
 
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row">
+          <input
+            type="text"
+            placeholder="Search vinyls..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-neutral-400"
+          />
+
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value as SortOption)}
+            className="rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 outline-none transition focus:border-neutral-400"
+          >
+            <option value="default">Default</option>
+            <option value="title">Title</option>
+            <option value="artist">Artist</option>
+            <option value="year">Year</option>
+          </select>
+        </div>
+
+        {filteredAlbums.length === 0 && (
+          <p className="mb-4 text-sm text-neutral-500">
+            검색 결과가 없어요.
+          </p>
+        )}
+
         <div
           className={`grid gap-8 transition-all duration-300 ${
             selectedAlbum ? "lg:grid-cols-[1fr_360px]" : "lg:grid-cols-1"
@@ -31,7 +94,7 @@ export default function Home() {
         >
           <div className={selectedAlbum ? "" : "mx-auto w-full max-w-6xl"}>
             <VinylShelf
-              albums={albums}
+              albums={sortedAlbums}
               selectedAlbumId={selectedAlbum?.id}
               onAlbumClick={setSelectedAlbum}
             />
