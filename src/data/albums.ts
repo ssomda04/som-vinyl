@@ -3,6 +3,7 @@ import { Album } from "@/types/album";
 export const albums: Album[] = [
   {
     id: 1,
+    shelfOrder: 1,
     title: "Abbey Road",
     artist: "The Beatles",
     year: 1969,
@@ -16,6 +17,7 @@ export const albums: Album[] = [
   },
   {
     id: 2,
+    shelfOrder: 2,
     title: "Blue",
     artist: "Joni Mitchell",
     year: 1971,
@@ -29,19 +31,21 @@ export const albums: Album[] = [
   },
   {
   id: 3,
-  title: "POWER ANDRE 99",
-  artist: "Silica Gel",
-  year: 2023,
-  genre: ["K-Rock", "Alternative"],
-  coverImage: "/covers/power-andre-99.jpg",
-  tracks: {
-    sideA: ["Tik Tak Tok", "NO PAIN", "Realize"],
-    sideB: ["Ryudejakeiru", "Mercurial", "Budland"],
-  },
-  memo: "실리카겔 특유의 질감이 좋은 앨범",
+    shelfOrder: 3,
+    title: "POWER ANDRE 99",
+    artist: "Silica Gel",
+    year: 2023,
+    genre: ["K-Rock", "Alternative"],
+    coverImage: "/covers/power-andre-99.jpg",
+    tracks: {
+      sideA: ["Tik Tak Tok", "NO PAIN", "Realize"],
+      sideB: ["Ryudejakeiru", "Mercurial", "Budland"],
+    },
+    memo: "실리카겔 특유의 질감이 좋은 앨범",
 },
 {
   id: 4,
+  shelfOrder: 4,
   title: "TEAM BABY",
   artist: "The Black Skirts",
   year: 2017,
@@ -55,6 +59,7 @@ export const albums: Album[] = [
 },
 {
   id: 5,
+  shelfOrder: 5,
   title: "검정치마 201",
   artist: "The Black Skirts",
   year: 2014,
@@ -67,6 +72,7 @@ export const albums: Album[] = [
 },
 {
   id: 6,
+  shelfOrder: 6,
   title: "졸업",
   artist: "브로콜리너마저",
   year: 2010,
@@ -79,7 +85,8 @@ export const albums: Album[] = [
   memo: "봄밤 감성",
 },
 {
-  id: 7,
+  id: 7, 
+  shelfOrder: 7,
   title: "보편적인 노래",
   artist: "브로콜리너마저",
   year: 2012,
@@ -92,6 +99,7 @@ export const albums: Album[] = [
 },
 {
   id: 8,
+  shelfOrder: 8,
   title: "버스커 버스커 1집",
   artist: "버스커 버스커",
   year: 2012,
@@ -104,6 +112,7 @@ export const albums: Album[] = [
 },
 {
   id: 9,
+  shelfOrder: 9,
   title: "Californication",
   artist: "Red Hot Chili Peppers",
   year: 1999,
@@ -117,6 +126,7 @@ export const albums: Album[] = [
 },
 {
   id: 10,
+  shelfOrder: 10,
   title: "By the Way",
   artist: "Red Hot Chili Peppers",
   year: 2002,
@@ -129,6 +139,7 @@ export const albums: Album[] = [
 },
 {
   id: 11,
+  shelfOrder: 11,
   title: "American Idiot",
   artist: "Green Day",
   year: 2004,
@@ -141,6 +152,7 @@ export const albums: Album[] = [
 },
 {
   id: 12,
+  shelfOrder: 12,
   title: "Dookie",
   artist: "Green Day",
   year: 1994,

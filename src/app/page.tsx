@@ -6,13 +6,13 @@ import VinylShelf from "@/components/VinylShelf";
 import { albums } from "@/data/albums";
 import type { Album } from "@/types/album";
 
-type SortOption = "default" | "title" | "artist" | "year";
+type SortOption = "shelf" | "title" | "artist" | "year";
 
 export default function Home() {
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [onTurntableAlbum, setOnTurntableAlbum] = useState<Album | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOption, setSortOption] = useState<SortOption>("default");
+  const [sortOption, setSortOption] = useState<SortOption>("shelf");
 
   const filteredAlbums = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -30,6 +30,9 @@ export default function Home() {
 
   const sortedAlbums = useMemo(() => {
     const copiedAlbums = [...filteredAlbums];
+    if (sortOption === "shelf") {
+      return copiedAlbums.sort((a, b) => a.shelfOrder - b.shelfOrder);
+    }
 
     if (sortOption === "title") {
       return copiedAlbums.sort((a, b) => a.title.localeCompare(b.title));
@@ -129,7 +132,7 @@ export default function Home() {
             onChange={(e) => setSortOption(e.target.value as SortOption)}
             className="rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 outline-none transition focus:border-neutral-400"
           >
-            <option value="default">Default</option>
+            <option value="shelf">Shelf Order</option>
             <option value="title">Title</option>
             <option value="artist">Artist</option>
             <option value="year">Year</option>
