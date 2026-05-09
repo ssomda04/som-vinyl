@@ -6,7 +6,7 @@ type SearchSortBarProps = {
   isAdminMode: boolean;
   onSearchChange: (value: string) => void;
   onSortChange: (value: SortOption) => void;
-  onToggleAdminMode: () => void;
+  onAdminAccess: () => void;
 };
 
 export default function SearchSortBar({
@@ -15,7 +15,7 @@ export default function SearchSortBar({
   isAdminMode,
   onSearchChange,
   onSortChange,
-  onToggleAdminMode,
+  onAdminAccess,
 }: SearchSortBarProps) {
   return (
     <div className="mb-8 flex flex-col gap-3 sm:flex-row">
@@ -38,9 +38,10 @@ export default function SearchSortBar({
         <option value="year">Year</option>
       </select>
 
+    {isAdminMode && (
       <button
         type="button"
-        onClick={onToggleAdminMode}
+        onClick={onAdminAccess}
         className={`rounded-xl border px-4 py-3 text-sm transition ${
           isAdminMode
             ? "border-neutral-900 bg-neutral-900 text-white"
@@ -49,6 +50,7 @@ export default function SearchSortBar({
       >
         {isAdminMode ? "Editing Shelf" : "Edit Shelf"}
       </button>
+    )}
     </div>
   );
 }

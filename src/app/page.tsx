@@ -12,6 +12,8 @@ import type { Album } from "@/types/album";
 import type { SortOption } from "@/types/sort";
 const STORAGE_KEY = "som-vinyl-collection";
 const TURNTABLE_STORAGE_KEY = "som-vinyl-turntable";
+const ADMIN_PASSWORD = "vinyl";
+const ADMIN_STORAGE_KEY = "som-vinyl-admin";
 
 export default function Home() {
   const [collectionAlbums, setCollectionAlbums] = useState<Album[]>(albums);
@@ -25,6 +27,7 @@ export default function Home() {
   useEffect(() => {
     const savedCollection = localStorage.getItem(STORAGE_KEY);
     const savedTurntableAlbum = localStorage.getItem(TURNTABLE_STORAGE_KEY);
+    const savedAdminMode = localStorage.getItem(ADMIN_STORAGE_KEY);
 
     if (savedCollection) {
       setCollectionAlbums(JSON.parse(savedCollection));
@@ -33,7 +36,13 @@ export default function Home() {
     if (savedTurntableAlbum) {
       setOnTurntableAlbum(JSON.parse(savedTurntableAlbum));
     }
+    if (savedAdminMode === "true") {
+      setIsAdminMode(true);
+    }
   }, []);
+  useEffect(() => {
+    localStorage.setItem(ADMIN_STORAGE_KEY, String(isAdminMode));
+  }, [isAdminMode]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(collectionAlbums));
@@ -100,10 +109,21 @@ export default function Home() {
     });
   };
 
-  const handleToggleAdminMode = () => {
-    setIsAdminMode((prev) => !prev);
-    setSortOption("shelf");
-    setSearchQuery("");
+  const handleAdminAccess = () => {
+    if (isAdminMode) {
+      setIsAdminMode(false);
+      return;
+    }
+
+    const password = window.prompt("Enter admin password");
+
+    if (password === ADMIN_PASSWORD) {
+      setIsAdminMode(true);
+      setSortOption("shelf");
+      setSearchQuery("");
+    } else if (password !== null) {
+      alert("Wrong password");
+    }
   };
 
   const handleAddAlbum = (album: Album) => {
@@ -115,13 +135,24 @@ export default function Home() {
     <main className="min-h-screen bg-[#f5efe6] px-6 py-10">
       <section className="mx-auto max-w-7xl">
         <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_280px] lg:items-end">
-          <div>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={handleAdminAccess}
+              className="absolute right-0 top-0 text-sm text-neutral-300 transition hover:text-neutral-500"
+              aria-label="Admin access"
+            >
+              •••
+            </button>
+
             <p className="text-sm uppercase tracking-[0.3em] text-neutral-500">
               Som&apos;s Collection
             </p>
+
             <h1 className="mt-2 text-4xl font-bold text-neutral-900">
               Vinyl Archive
             </h1>
+
             <p className="mt-3 text-neutral-600">
               내가 수집한 LP 바이닐을 한눈에 보는 개인 아카이브
             </p>
@@ -139,9 +170,9 @@ export default function Home() {
           isAdminMode={isAdminMode}
           onSearchChange={setSearchQuery}
           onSortChange={setSortOption}
-          onToggleAdminMode={handleToggleAdminMode}
+          onAdminAccess={handleAdminAccess}
         />
-
+      {isAdminMode && (
         <div className="mb-6 flex justify-end">
           <button
             type="button"
@@ -151,7 +182,8 @@ export default function Home() {
             + Add Vinyl
           </button>
         </div>
-
+      )}
+      
         {filteredAlbums.length === 0 && (
           <p className="mb-4 text-sm text-neutral-500">검색 결과가 없어요.</p>
         )}
