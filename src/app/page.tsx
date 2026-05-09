@@ -1,7 +1,7 @@
 "use client";
 
 import { arrayMove } from "@dnd-kit/sortable";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AlbumDetailPanel from "@/components/AlbumDetailPanel";
 import SearchSortBar from "@/components/SearchSortBar";
 import TurntableCard from "@/components/TurntableCard";
@@ -9,6 +9,8 @@ import VinylShelf from "@/components/VinylShelf";
 import { albums } from "@/data/albums";
 import type { Album } from "@/types/album";
 import type { SortOption } from "@/types/sort";
+const STORAGE_KEY = "som-vinyl-collection";
+const TURNTABLE_STORAGE_KEY = "som-vinyl-turntable";
 
 export default function Home() {
   const [collectionAlbums, setCollectionAlbums] = useState<Album[]>(albums);
@@ -18,6 +20,34 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("shelf");
 
+  useEffect(() => {
+    const savedCollection = localStorage.getItem(STORAGE_KEY);
+    const savedTurntableAlbum = localStorage.getItem(TURNTABLE_STORAGE_KEY);
+
+    if (savedCollection) {
+      setCollectionAlbums(JSON.parse(savedCollection));
+    }
+
+    if (savedTurntableAlbum) {
+      setOnTurntableAlbum(JSON.parse(savedTurntableAlbum));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(collectionAlbums));
+  }, [collectionAlbums]);
+
+  useEffect(() => {
+    if (onTurntableAlbum) {
+      localStorage.setItem(
+        TURNTABLE_STORAGE_KEY,
+        JSON.stringify(onTurntableAlbum)
+      );
+    } else {
+      localStorage.removeItem(TURNTABLE_STORAGE_KEY);
+    }
+  }, [onTurntableAlbum]);
+  
   const filteredAlbums = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
