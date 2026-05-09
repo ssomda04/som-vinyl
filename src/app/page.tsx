@@ -6,6 +6,7 @@ import AlbumDetailPanel from "@/components/AlbumDetailPanel";
 import SearchSortBar from "@/components/SearchSortBar";
 import TurntableCard from "@/components/TurntableCard";
 import VinylShelf from "@/components/VinylShelf";
+import AddAlbumForm from "@/components/AddAlbumForm";
 import { albums } from "@/data/albums";
 import type { Album } from "@/types/album";
 import type { SortOption } from "@/types/sort";
@@ -19,6 +20,7 @@ export default function Home() {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("shelf");
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   useEffect(() => {
     const savedCollection = localStorage.getItem(STORAGE_KEY);
@@ -47,7 +49,7 @@ export default function Home() {
       localStorage.removeItem(TURNTABLE_STORAGE_KEY);
     }
   }, [onTurntableAlbum]);
-  
+
   const filteredAlbums = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -104,6 +106,11 @@ export default function Home() {
     setSearchQuery("");
   };
 
+  const handleAddAlbum = (album: Album) => {
+    setCollectionAlbums((prevAlbums) => [...prevAlbums, album]);
+    setSortOption("shelf");
+  };
+
   return (
     <main className="min-h-screen bg-[#f5efe6] px-6 py-10">
       <section className="mx-auto max-w-7xl">
@@ -135,6 +142,16 @@ export default function Home() {
           onToggleAdminMode={handleToggleAdminMode}
         />
 
+        <div className="mb-6 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setIsAddFormOpen(true)}
+            className="rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 transition hover:border-neutral-400"
+          >
+            + Add Vinyl
+          </button>
+        </div>
+
         {filteredAlbums.length === 0 && (
           <p className="mb-4 text-sm text-neutral-500">검색 결과가 없어요.</p>
         )}
@@ -162,6 +179,16 @@ export default function Home() {
             />
           )}
         </div>
+      {isAddFormOpen && (
+        <AddAlbumForm
+          nextId={Math.max(...collectionAlbums.map((album) => album.id)) + 1}
+          nextShelfOrder={
+            Math.max(...collectionAlbums.map((album) => album.shelfOrder)) + 1
+          }
+          onAddAlbum={handleAddAlbum}
+          onClose={() => setIsAddFormOpen(false)}
+        />
+      )}  
       </section>
     </main>
   );
