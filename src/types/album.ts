@@ -1,5 +1,6 @@
 export type Album = {
   id: number;
+  shelfOrder: number;
   title: string;
   artist: string;
   year: number;
