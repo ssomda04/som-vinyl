@@ -19,8 +19,31 @@ export default function AddAlbumForm({
   const [year, setYear] = useState("");
   const [genre, setGenre] = useState("");
   const [coverImage, setCoverImage] = useState("");
-  const [sideA, setSideA] = useState("");
-  const [sideB, setSideB] = useState("");
+  const [tracksText, setTracksText] = useState("");
+
+  const parseTracks = (text: string) => {
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .reduce<Record<string, string[]>>((acc, line) => {
+        const match = line.match(/^([A-Z])\d+\s+(.+)$/i);
+
+        if (!match) {
+          if (!acc.A) acc.A = [];
+          acc.A.push(line);
+          return acc;
+        }
+
+        const side = match[1].toUpperCase();
+        const trackTitle = match[2].trim();
+
+        if (!acc[side]) acc[side] = [];
+        acc[side].push(trackTitle);
+
+        return acc;
+      }, {});
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +54,12 @@ export default function AddAlbumForm({
       title,
       artist,
       year: Number(year),
-      genre: genre.split(",").map((item) => item.trim()).filter(Boolean),
+      genre: genre
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
       coverImage: coverImage || "/next.svg",
-      tracks: {
-        sideA: sideA.split("\n").map((item) => item.trim()).filter(Boolean),
-        sideB: sideB.split("\n").map((item) => item.trim()).filter(Boolean),
-      },
+      tracks: parseTracks(tracksText),
     };
 
     onAddAlbum(newAlbum);
@@ -109,17 +132,16 @@ export default function AddAlbumForm({
           />
 
           <textarea
-            placeholder="Side A tracks, one per line"
-            value={sideA}
-            onChange={(e) => setSideA(e.target.value)}
-            className="min-h-28 w-full rounded-xl border px-4 py-3 text-sm"
-          />
+            placeholder={`Tracks
 
-          <textarea
-            placeholder="Side B tracks, one per line"
-            value={sideB}
-            onChange={(e) => setSideB(e.target.value)}
-            className="min-h-28 w-full rounded-xl border px-4 py-3 text-sm"
+A1 Track title
+A2 Track title
+B1 Track title
+B2 Track title
+C1 Track title`}
+            value={tracksText}
+            onChange={(e) => setTracksText(e.target.value)}
+            className="min-h-40 w-full rounded-xl border px-4 py-3 text-sm"
           />
         </div>
 

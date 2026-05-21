@@ -67,33 +67,22 @@ export default function AlbumDetailPanel({
         <h3 className="text-sm font-semibold text-neutral-900">Tracklist</h3>
 
         <div className="mt-3 space-y-4 text-sm text-neutral-700">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-neutral-400">
-              Side A
-            </p>
-            <ol className="space-y-1">
-              {album.tracks.sideA.map((track, index) => (
-                <li key={track}>
-                  {index + 1}. {track}
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-neutral-400">
-              Side B
-            </p>
-            <ol className="space-y-1">
-              {album.tracks.sideB.map((track, index) => (
-                <li key={track}>
-                  {index + 1}. {track}
-                </li>
-              ))}
-            </ol>
-          </div>
+            {Object.entries(album.tracks).map(([side, tracks]) => (
+            <div key={side}>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-neutral-400">
+                Side {side}
+                </p>
+                <ol className="space-y-1">
+                {tracks.map((track, index) => (
+                    <li key={`${side}-${track}`}>
+                    {index + 1}. {track}
+                    </li>
+                ))}
+                </ol>
+            </div>
+            ))}
         </div>
-      </div>
+    </div>
     </aside>
   );
 }

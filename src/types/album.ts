@@ -6,9 +6,6 @@ export type Album = {
   year: number;
   genre: string[];
   coverImage: string;
-  tracks: {
-    sideA: string[];
-    sideB: string[];
-  };
+  tracks: Record<string, string[]>;
   memo?: string;
 };

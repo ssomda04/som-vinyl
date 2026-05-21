@@ -10,8 +10,8 @@ export const albums: Album[] = [
     genre: ["Rock"],
     coverImage: "/covers/abbey-road.jpg",
     tracks: {
-      sideA: ["Come Together", "Something", "Maxwell's Silver Hammer"],
-      sideB: ["Here Comes the Sun", "Because", "The End"],
+      A: ["Come Together", "Something", "Maxwell's Silver Hammer"],
+      B: ["Here Comes the Sun", "Because", "The End"],
     },
     memo: "처음 넣어보는 예시 LP",
   },
@@ -24,8 +24,8 @@ export const albums: Album[] = [
     genre: ["Folk"],
     coverImage: "/covers/blue.jpg",
     tracks: {
-      sideA: ["All I Want", "My Old Man", "Little Green"],
-      sideB: ["California", "River", "The Last Time I Saw Richard"],
+      A: ["All I Want", "My Old Man", "Little Green"],
+      B: ["California", "River", "The Last Time I Saw Richard"],
     },
     memo: "수납장 느낌 확인용 더미 데이터",
   },
@@ -38,8 +38,8 @@ export const albums: Album[] = [
     genre: ["K-Rock", "Alternative"],
     coverImage: "/covers/power-andre-99.jpg",
     tracks: {
-      sideA: ["Tik Tak Tok", "NO PAIN", "Realize"],
-      sideB: ["Ryudejakeiru", "Mercurial", "Budland"],
+      A: ["Tik Tak Tok", "NO PAIN", "Realize"],
+      B: ["Ryudejakeiru", "Mercurial", "Budland"],
     },
     memo: "실리카겔 특유의 질감이 좋은 앨범",
 },
@@ -52,8 +52,8 @@ export const albums: Album[] = [
   genre: ["Indie Rock", "K-Indie"],
   coverImage: "/covers/team-baby.jpg",
   tracks: {
-    sideA: ["나랑 아니면", "섬", "EVERYTHING"],
-    sideB: ["혜야", "내 고향 서울엔", "LOVE SHINE"],
+    A: ["나랑 아니면", "섬", "EVERYTHING"],
+    B: ["혜야", "내 고향 서울엔", "LOVE SHINE"],
   },
   memo: "늦은 밤에 듣기 좋은 앨범",
 },
@@ -66,8 +66,8 @@ export const albums: Album[] = [
   genre: ["Indie Rock"],
   coverImage: "/covers/201.jpg",
   tracks: {
-    sideA: ["Hollywood", "청춘", "Antifreeze"],
-    sideB: ["Put Me On Drugs", "Ling Ling", "나랑 아니면"],
+    A: ["Hollywood", "청춘", "Antifreeze"],
+    B: ["Put Me On Drugs", "Ling Ling", "나랑 아니면"],
   },
 },
 {
@@ -79,8 +79,8 @@ export const albums: Album[] = [
   genre: ["Indie", "Folk Rock"],
   coverImage: "/covers/graduation.jpg",
   tracks: {
-    sideA: ["졸업", "유자차", "보편적인 노래"],
-    sideB: ["앵콜요청금지", "열두시 반", "사막"],
+    A: ["졸업", "유자차", "보편적인 노래"],
+    B: ["앵콜요청금지", "열두시 반", "사막"],
   },
   memo: "봄밤 감성",
 },
@@ -93,8 +93,8 @@ export const albums: Album[] = [
   genre: ["Indie", "K-Indie"],
   coverImage: "/covers/universal-song.jpg",
   tracks: {
-    sideA: ["이웃에 방해가 되지 않는 선에서", "사랑한다는 말로도 위로가 되지 않는"],
-    sideB: ["울지마", "잔인한 사월", "보편적인 노래"],
+    A: ["이웃에 방해가 되지 않는 선에서", "사랑한다는 말로도 위로가 되지 않는"],
+    B: ["울지마", "잔인한 사월", "보편적인 노래"],
   },
 },
 {
@@ -106,8 +106,8 @@ export const albums: Album[] = [
   genre: ["Folk Rock", "K-Indie"],
   coverImage: "/covers/busker-busker.jpg",
   tracks: {
-    sideA: ["벚꽃 엔딩", "첫사랑", "여수 밤바다"],
-    sideB: ["이상형", "외로움증폭장치", "꽃송이가"],
+    A: ["벚꽃 엔딩", "첫사랑", "여수 밤바다"],
+    B: ["이상형", "외로움증폭장치", "꽃송이가"],
   },
 },
 {
@@ -119,8 +119,8 @@ export const albums: Album[] = [
   genre: ["Alternative Rock", "Funk Rock"],
   coverImage: "/covers/californication.jpg",
   tracks: {
-    sideA: ["Around the World", "Parallel Universe", "Scar Tissue"],
-    sideB: ["Californication", "Easily", "Road Trippin'"],
+    A: ["Around the World", "Parallel Universe", "Scar Tissue"],
+    B: ["Californication", "Easily", "Road Trippin'"],
   },
   memo: "커버 디자인이 특히 좋아하는 LP",
 },
@@ -133,8 +133,8 @@ export const albums: Album[] = [
   genre: ["Alternative Rock"],
   coverImage: "/covers/by-the-way.jpg",
   tracks: {
-    sideA: ["By the Way", "Universally Speaking", "Dosed"],
-    sideB: ["Don't Forget Me", "The Zephyr Song", "Venice Queen"],
+    A: ["By the Way", "Universally Speaking", "Dosed"],
+    B: ["Don't Forget Me", "The Zephyr Song", "Venice Queen"],
   },
 },
 {
@@ -146,8 +146,8 @@ export const albums: Album[] = [
   genre: ["Punk Rock"],
   coverImage: "/covers/american-idiot.jpg",
   tracks: {
-    sideA: ["American Idiot", "Jesus of Suburbia", "Holiday"],
-    sideB: ["Boulevard of Broken Dreams", "Wake Me Up When September Ends"],
+    A: ["American Idiot", "Jesus of Suburbia", "Holiday"],
+    B: ["Boulevard of Broken Dreams", "Wake Me Up When September Ends"],
   },
 },
 {
@@ -159,8 +159,8 @@ export const albums: Album[] = [
   genre: ["Punk Rock"],
   coverImage: "/covers/dookie.jpg",
   tracks: {
-    sideA: ["Burnout", "Having a Blast", "Basket Case"],
-    sideB: ["When I Come Around", "She", "F.O.D."],
+    A: ["Burnout", "Having a Blast", "Basket Case"],
+    B: ["When I Come Around", "She", "F.O.D."],
   },
 }
   
