@@ -10,6 +10,8 @@ import AddAlbumForm from "@/components/AddAlbumForm";
 import { albums } from "@/data/albums";
 import type { Album } from "@/types/album";
 import type { SortOption } from "@/types/sort";
+import { supabase } from "@/lib/supabase";
+import { albumToRow, rowToAlbum } from "@/lib/albumMapper";
 const STORAGE_KEY = "som-vinyl-collection";
 const TURNTABLE_STORAGE_KEY = "som-vinyl-turntable";
 const ADMIN_PASSWORD = "vinyl";
@@ -17,7 +19,7 @@ const ADMIN_STORAGE_KEY = "som-vinyl-admin";
 
 
 export default function Home() {
-  const [collectionAlbums, setCollectionAlbums] = useState<Album[]>(albums);
+  const [collectionAlbums, setCollectionAlbums] = useState<Album[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [onTurntableAlbum, setOnTurntableAlbum] = useState<Album | null>(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -27,31 +29,36 @@ export default function Home() {
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
 
   useEffect(() => {
-    const savedCollection = localStorage.getItem(STORAGE_KEY);
-    const savedTurntableAlbum = localStorage.getItem(TURNTABLE_STORAGE_KEY);
-    // const savedAdminMode = localStorage.getItem(ADMIN_STORAGE_KEY);
+    const fetchAlbums = async () => {
+      const { data, error } = await supabase
+        .from("albums")
+        .select("*")
+        .order("shelf_order", { ascending: true });
 
-    if (savedCollection) {
-      setCollectionAlbums(JSON.parse(savedCollection));
-    }
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setCollectionAlbums(data.map(rowToAlbum));
+    };
+
+    fetchAlbums();
+
+    const savedTurntableAlbum = localStorage.getItem(
+      TURNTABLE_STORAGE_KEY
+    );
 
     if (savedTurntableAlbum) {
       setOnTurntableAlbum(JSON.parse(savedTurntableAlbum));
     }
-    
-    // if (savedAdminMode === "true") {
-    //   setIsAdminMode(true);
-    // }
-
   }, []);
+
   useEffect(() => {
     localStorage.setItem(ADMIN_STORAGE_KEY, String(isAdminMode));
   }, [isAdminMode]);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(collectionAlbums));
-  }, [collectionAlbums]);
-
+  
   useEffect(() => {
     if (onTurntableAlbum) {
       localStorage.setItem(
@@ -99,19 +106,30 @@ export default function Home() {
     return copiedAlbums;
   }, [filteredAlbums, sortOption]);
 
-  const handleReorderAlbums = (activeId: number, overId: number) => {
-    setCollectionAlbums((prevAlbums) => {
-      const oldIndex = prevAlbums.findIndex((album) => album.id === activeId);
-      const newIndex = prevAlbums.findIndex((album) => album.id === overId);
+const handleReorderAlbums = async (activeId: number, overId: number) => {
+  const oldIndex = collectionAlbums.findIndex((album) => album.id === activeId);
+  const newIndex = collectionAlbums.findIndex((album) => album.id === overId);
 
-      if (oldIndex === -1 || newIndex === -1) return prevAlbums;
+  if (oldIndex === -1 || newIndex === -1) return;
 
-      return arrayMove(prevAlbums, oldIndex, newIndex).map((album, index) => ({
-        ...album,
-        shelfOrder: index + 1,
-      }));
-    });
-  };
+  const reorderedAlbums = arrayMove(collectionAlbums, oldIndex, newIndex).map(
+    (album, index) => ({
+      ...album,
+      shelfOrder: index + 1,
+    })
+  );
+
+  setCollectionAlbums(reorderedAlbums);
+
+  const updates = reorderedAlbums.map((album) =>
+    supabase
+      .from("albums")
+      .update({ shelf_order: album.shelfOrder })
+      .eq("id", album.id)
+  );
+
+  await Promise.all(updates);
+};
 
   const handleAdminAccess = () => {
     if (isAdminMode) {
@@ -135,72 +153,113 @@ export default function Home() {
     setSortOption("shelf");
   };
 
-  const handleUpdateAlbumMemo = (albumId: number, memo: string) => {
-  setCollectionAlbums((prevAlbums) =>
-    prevAlbums.map((album) =>
-      album.id === albumId
-        ? {
-            ...album,
-            memo,
-          }
-        : album
-    )
-  );
+  const handleUpdateAlbumMemo = async (albumId: number, memo: string) => {
+    const { data, error } = await supabase
+      .from("albums")
+      .update({ memo })
+      .eq("id", albumId)
+      .select()
+      .single();
 
-  setSelectedAlbum((prevAlbum) =>
-    prevAlbum && prevAlbum.id === albumId
-      ? {
-          ...prevAlbum,
-          memo,
-        }
-      : prevAlbum
-  );
-
-  setOnTurntableAlbum((prevAlbum) =>
-    prevAlbum && prevAlbum.id === albumId
-      ? {
-          ...prevAlbum,
-          memo,
-        }
-      : prevAlbum
-  );
-};
-
-const handleSaveAlbum = (album: Album) => {
-  setCollectionAlbums((prevAlbums) => {
-    const exists = prevAlbums.some((item) => item.id === album.id);
-
-    if (exists) {
-      return prevAlbums.map((item) =>
-        item.id === album.id ? album : item
-      );
+    if (error) {
+      console.error(error);
+      alert("메모 저장에 실패했어요.");
+      return;
     }
 
-    return [...prevAlbums, album];
-  });
+    const updatedAlbum = rowToAlbum(data);
 
-  setSelectedAlbum(album);
+    setCollectionAlbums((prevAlbums) =>
+      prevAlbums.map((album) =>
+        album.id === albumId ? updatedAlbum : album
+      )
+    );
+
+    setSelectedAlbum((prevAlbum) =>
+      prevAlbum?.id === albumId ? updatedAlbum : prevAlbum
+    );
+
+    setOnTurntableAlbum((prevAlbum) =>
+      prevAlbum?.id === albumId ? updatedAlbum : prevAlbum
+    );
+  };
+
+const handleSaveAlbum = async (album: Album) => {
+  const normalizedAlbum: Album = {
+    ...album,
+    shelfOrder:
+      album.shelfOrder ??
+      Math.max(0, ...collectionAlbums.map((item) => item.shelfOrder ?? 0)) + 1,
+  };
+
+  const exists = collectionAlbums.some((item) => item.id === normalizedAlbum.id);
+
+  if (exists) {
+    const { data, error } = await supabase
+      .from("albums")
+      .update(albumToRow(normalizedAlbum))
+      .eq("id", normalizedAlbum.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert("앨범 수정에 실패했어요.");
+      return;
+    }
+
+    const updatedAlbum = rowToAlbum(data);
+
+    setCollectionAlbums((prevAlbums) =>
+      prevAlbums.map((item) =>
+        item.id === updatedAlbum.id ? updatedAlbum : item
+      )
+    );
+
+    setSelectedAlbum(updatedAlbum);
+  } else {
+    const { data, error } = await supabase
+      .from("albums")
+      .insert(albumToRow(normalizedAlbum))
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      alert("앨범 추가에 실패했어요.");
+      return;
+    }
+
+    const addedAlbum = rowToAlbum(data);
+
+    setCollectionAlbums((prevAlbums) => [...prevAlbums, addedAlbum]);
+    setSelectedAlbum(addedAlbum);
+  }
+
   setEditingAlbum(null);
   setIsAddFormOpen(false);
+  setSortOption("shelf");
 };
-
 const handleEditAlbum = (album: Album) => {
   setEditingAlbum(album);
   setIsAddFormOpen(true);
 };
 
-const handleDeleteAlbum = (albumId: number) => {
+const handleDeleteAlbum = async (albumId: number) => {
   const ok = window.confirm("이 앨범을 삭제할까요?");
 
   if (!ok) return;
 
+  const { error } = await supabase.from("albums").delete().eq("id", albumId);
+
+  if (error) {
+    console.error(error);
+    alert("앨범 삭제에 실패했어요.");
+    return;
+  }
+
   setCollectionAlbums((prevAlbums) =>
-    prevAlbums
-      .filter((album) => album.id !== albumId)
-      .map((album, index) => ({
-        ...album,
-        shelfOrder: index + 1,
-      }))
+    prevAlbums.filter((album) => album.id !== albumId)
   );
 
   setSelectedAlbum(null);
@@ -296,9 +355,9 @@ const handleDeleteAlbum = (albumId: number) => {
         </div>
       {isAddFormOpen && (
         <AddAlbumForm
-          nextId={Math.max(...collectionAlbums.map((album) => album.id)) + 1}
+          nextId={Math.max(0, ...collectionAlbums.map((album) => album.id ?? 0)) + 1}
           nextShelfOrder={
-            Math.max(...collectionAlbums.map((album) => album.shelfOrder)) + 1
+            Math.max(0, ...collectionAlbums.map((album) => album.shelfOrder ?? 0)) + 1
           }
           initialAlbum={editingAlbum}
           onAddAlbum={handleSaveAlbum}
