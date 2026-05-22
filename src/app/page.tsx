@@ -14,7 +14,6 @@ import { supabase } from "@/lib/supabase";
 import { albumToRow, rowToAlbum } from "@/lib/albumMapper";
 const STORAGE_KEY = "som-vinyl-collection";
 const TURNTABLE_STORAGE_KEY = "som-vinyl-turntable";
-const ADMIN_PASSWORD = "vinyl";
 const ADMIN_STORAGE_KEY = "som-vinyl-admin";
 
 
@@ -27,6 +26,7 @@ export default function Home() {
   const [sortOption, setSortOption] = useState<SortOption>("shelf");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
+  const [adminPassword, setAdminPassword] = useState("");
 
   useEffect(() => {
     const fetchAlbums = async () => {
@@ -131,21 +131,34 @@ const handleReorderAlbums = async (activeId: number, overId: number) => {
   await Promise.all(updates);
 };
 
-  const handleAdminAccess = () => {
+  const handleAdminAccess = async () => {
     if (isAdminMode) {
       setIsAdminMode(false);
+      setAdminPassword("");
       return;
     }
 
     const password = window.prompt("Enter admin password");
 
-    if (password === ADMIN_PASSWORD) {
-      setIsAdminMode(true);
-      setSortOption("shelf");
-      setSearchQuery("");
-    } else if (password !== null) {
+    if (!password) return;
+
+    const response = await fetch("/api/admin/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ password }),
+    });
+
+    if (!response.ok) {
       alert("Wrong password");
+      return;
     }
+
+    setIsAdminMode(true);
+    setAdminPassword(password);
+    setSortOption("shelf");
+    setSearchQuery("");
   };
 
   const handleAddAlbum = (album: Album) => {
@@ -153,36 +166,41 @@ const handleReorderAlbums = async (activeId: number, overId: number) => {
     setSortOption("shelf");
   };
 
-  const handleUpdateAlbumMemo = async (albumId: number, memo: string) => {
-    const { data, error } = await supabase
-      .from("albums")
-      .update({ memo })
-      .eq("id", albumId)
-      .select()
-      .single();
+const handleUpdateAlbumMemo = async (albumId: number, memo: string) => {
+  const response = await fetch("/api/admin/albums", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-password": adminPassword,
+    },
+    body: JSON.stringify({
+      id: albumId,
+      memo,
+    }),
+  });
 
-    if (error) {
-      console.error(error);
-      alert("메모 저장에 실패했어요.");
-      return;
-    }
+  if (!response.ok) {
+    console.error(await response.json());
+    alert("메모 저장에 실패했어요.");
+    return;
+  }
 
-    const updatedAlbum = rowToAlbum(data);
+  const updatedAlbum = rowToAlbum(await response.json());
 
-    setCollectionAlbums((prevAlbums) =>
-      prevAlbums.map((album) =>
-        album.id === albumId ? updatedAlbum : album
-      )
-    );
+  setCollectionAlbums((prevAlbums) =>
+    prevAlbums.map((album) =>
+      album.id === albumId ? updatedAlbum : album
+    )
+  );
 
-    setSelectedAlbum((prevAlbum) =>
-      prevAlbum?.id === albumId ? updatedAlbum : prevAlbum
-    );
+  setSelectedAlbum((prevAlbum) =>
+    prevAlbum?.id === albumId ? updatedAlbum : prevAlbum
+  );
 
-    setOnTurntableAlbum((prevAlbum) =>
-      prevAlbum?.id === albumId ? updatedAlbum : prevAlbum
-    );
-  };
+  setOnTurntableAlbum((prevAlbum) =>
+    prevAlbum?.id === albumId ? updatedAlbum : prevAlbum
+  );
+};
 
 const handleSaveAlbum = async (album: Album) => {
   const normalizedAlbum: Album = {
@@ -192,23 +210,29 @@ const handleSaveAlbum = async (album: Album) => {
       Math.max(0, ...collectionAlbums.map((item) => item.shelfOrder ?? 0)) + 1,
   };
 
-  const exists = collectionAlbums.some((item) => item.id === normalizedAlbum.id);
+  const exists = collectionAlbums.some(
+    (item) => item.id === normalizedAlbum.id
+  );
 
   if (exists) {
-    const { data, error } = await supabase
-      .from("albums")
-      .update(albumToRow(normalizedAlbum))
-      .eq("id", normalizedAlbum.id)
-      .select()
-      .single();
+    const response = await fetch("/api/admin/albums", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": adminPassword,
+      },
+      body: JSON.stringify({
+        id: normalizedAlbum.id,
+        ...albumToRow(normalizedAlbum),
+      }),
+    });
 
-    if (error) {
-      console.error(error);
+    if (!response.ok) {
       alert("앨범 수정에 실패했어요.");
       return;
     }
 
-    const updatedAlbum = rowToAlbum(data);
+    const updatedAlbum = rowToAlbum(await response.json());
 
     setCollectionAlbums((prevAlbums) =>
       prevAlbums.map((item) =>
@@ -218,19 +242,21 @@ const handleSaveAlbum = async (album: Album) => {
 
     setSelectedAlbum(updatedAlbum);
   } else {
-    const { data, error } = await supabase
-      .from("albums")
-      .insert(albumToRow(normalizedAlbum))
-      .select()
-      .single();
+    const response = await fetch("/api/admin/albums", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-password": adminPassword,
+      },
+      body: JSON.stringify(albumToRow(normalizedAlbum)),
+    });
 
-    if (error) {
-      console.error(error);
+    if (!response.ok) {
       alert("앨범 추가에 실패했어요.");
       return;
     }
 
-    const addedAlbum = rowToAlbum(data);
+    const addedAlbum = rowToAlbum(await response.json());
 
     setCollectionAlbums((prevAlbums) => [...prevAlbums, addedAlbum]);
     setSelectedAlbum(addedAlbum);
@@ -240,6 +266,7 @@ const handleSaveAlbum = async (album: Album) => {
   setIsAddFormOpen(false);
   setSortOption("shelf");
 };
+
 const handleEditAlbum = (album: Album) => {
   setEditingAlbum(album);
   setIsAddFormOpen(true);
@@ -250,10 +277,16 @@ const handleDeleteAlbum = async (albumId: number) => {
 
   if (!ok) return;
 
-  const { error } = await supabase.from("albums").delete().eq("id", albumId);
+  const response = await fetch("/api/admin/albums", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-password": adminPassword,
+    },
+    body: JSON.stringify({ id: albumId }),
+  });
 
-  if (error) {
-    console.error(error);
+  if (!response.ok) {
     alert("앨범 삭제에 실패했어요.");
     return;
   }
@@ -268,7 +301,6 @@ const handleDeleteAlbum = async (albumId: number) => {
     prevAlbum?.id === albumId ? null : prevAlbum
   );
 };
-
   return (
     <main className="min-h-screen bg-[#f5efe6] px-6 py-10">
       <section className="mx-auto max-w-7xl">
