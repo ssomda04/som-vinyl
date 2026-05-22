@@ -131,6 +131,37 @@ export default function Home() {
     setSortOption("shelf");
   };
 
+  const handleUpdateAlbumMemo = (albumId: number, memo: string) => {
+  setCollectionAlbums((prevAlbums) =>
+    prevAlbums.map((album) =>
+      album.id === albumId
+        ? {
+            ...album,
+            memo,
+          }
+        : album
+    )
+  );
+
+  setSelectedAlbum((prevAlbum) =>
+    prevAlbum && prevAlbum.id === albumId
+      ? {
+          ...prevAlbum,
+          memo,
+        }
+      : prevAlbum
+  );
+
+  setOnTurntableAlbum((prevAlbum) =>
+    prevAlbum && prevAlbum.id === albumId
+      ? {
+          ...prevAlbum,
+          memo,
+        }
+      : prevAlbum
+  );
+};
+
   return (
     <main className="min-h-screen bg-[#f5efe6] px-6 py-10">
       <section className="mx-auto max-w-7xl">
@@ -206,8 +237,10 @@ export default function Home() {
           {selectedAlbum && (
             <AlbumDetailPanel
               album={selectedAlbum}
+              isAdminMode={isAdminMode}
               onClose={() => setSelectedAlbum(null)}
               onPlaceOnTurntable={setOnTurntableAlbum}
+              onUpdateMemo={handleUpdateAlbumMemo}
             />
           )}
         </div>

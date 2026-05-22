@@ -56,42 +56,45 @@ export default function AddAlbumForm({
   const [coverImage, setCoverImage] = useState("");
   const [tracksText, setTracksText] = useState("");
 
-  const parseTracks = (text: string) => {
-    return text
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .reduce<Record<string, string[]>>((acc, line) => {
-        const match = line.match(/^([A-Z])\d+\s+(.+)$/i);
+const parseTracks = (text: string) => {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .reduce<Record<string, string[]>>((acc, line) => {
+      const match = line.match(/^([A-Z]+)\d*\s+(.+)$/i);
 
-        if (!match) {
-          if (!acc.A) acc.A = [];
-          acc.A.push(line);
-          return acc;
-        }
-
-        const side = match[1].toUpperCase();
-        const trackTitle = match[2].trim();
-
-        if (!acc[side]) acc[side] = [];
-        acc[side].push(trackTitle);
-
+      if (!match) {
+        if (!acc.A) acc.A = [];
+        acc.A.push(line);
         return acc;
-      }, {});
-  };
+      }
 
-  const formatDiscogsTracks = (tracklist: DiscogsTrack[] = []) => {
-    return tracklist
-      .filter((track) => track.type_ !== "heading" && track.title)
-      .map((track) => {
-        if (track.position) {
-          return `${track.position} ${track.title}`;
-        }
+      const rawSide = match[1].toUpperCase();
+      const side = rawSide.replace(/[^A-Z]/g, "");
+      const trackTitle = match[2].trim();
 
-        return track.title;
-      })
-      .join("\n");
-  };
+      if (!acc[side]) acc[side] = [];
+      acc[side].push(trackTitle);
+
+      return acc;
+    }, {});
+};
+
+const formatDiscogsTracks = (tracklist: DiscogsTrack[] = []) => {
+  return tracklist
+    .filter((track) => track.type_ !== "heading" && track.title)
+    .map((track) => {
+      const position = track.position?.trim();
+
+      if (position) {
+        return `${position} ${track.title}`;
+      }
+
+      return track.title;
+    })
+    .join("\n");
+};
 
   const handleDiscogsSearch = async () => {
     if (!discogsQuery.trim()) return;
@@ -243,7 +246,7 @@ export default function AddAlbumForm({
             placeholder="Album title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border px-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400"
           />
 
           <input
@@ -251,7 +254,7 @@ export default function AddAlbumForm({
             placeholder="Artist"
             value={artist}
             onChange={(e) => setArtist(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border px-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400"
           />
 
           <input
@@ -260,21 +263,21 @@ export default function AddAlbumForm({
             placeholder="Year"
             value={year}
             onChange={(e) => setYear(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border px-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400"
           />
 
           <input
             placeholder="Genre, comma separated ex) Rock, Indie"
             value={genre}
             onChange={(e) => setGenre(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border px-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400"
           />
 
           <input
             placeholder="Cover image path or URL"
             value={coverImage}
             onChange={(e) => setCoverImage(e.target.value)}
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+            className="w-full rounded-xl border px-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400"
           />
 
           <textarea

@@ -26,7 +26,7 @@ export default function VinylCard({ album, isSelected }: VinylCardProps) {
         <h2 className="truncate text-sm font-semibold text-neutral-900">
           {album.title}
         </h2>
-        <p className="truncate text-xs text-neutral-500">{album.artist}</p>
+        <p className="truncate text-xs text-neutral-400">{album.artist}</p>
       </div>
     </div>
   );
