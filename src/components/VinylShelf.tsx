@@ -105,16 +105,28 @@ function SortableVinylItem({
   };
 
   return (
-    <button
+    <div
       ref={setNodeRef}
       style={style}
-      type="button"
-      onClick={() => onAlbumClick(album)}
-      className={`text-left ${isDragging ? "z-10 opacity-70" : ""}`}
-      {...attributes}
-      {...listeners}
+      className={`group relative text-left ${isDragging ? "z-10 opacity-70" : ""}`}
     >
-      <VinylCard album={album} isSelected={isSelected} />
-    </button>
+      <button
+        type="button"
+        onClick={() => onAlbumClick(album)}
+        className="w-full text-left"
+      >
+        <VinylCard album={album} isSelected={isSelected} />
+      </button>
+
+      <button
+        type="button"
+        className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-1 text-xs text-white opacity-0 transition group-hover:opacity-100"
+        aria-label="Drag album"
+        {...attributes}
+        {...listeners}
+      >
+        ⋮⋮
+      </button>
+    </div>
   );
 }

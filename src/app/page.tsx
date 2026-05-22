@@ -15,6 +15,7 @@ const TURNTABLE_STORAGE_KEY = "som-vinyl-turntable";
 const ADMIN_PASSWORD = "vinyl";
 const ADMIN_STORAGE_KEY = "som-vinyl-admin";
 
+
 export default function Home() {
   const [collectionAlbums, setCollectionAlbums] = useState<Album[]>(albums);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -23,11 +24,12 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("shelf");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
 
   useEffect(() => {
     const savedCollection = localStorage.getItem(STORAGE_KEY);
     const savedTurntableAlbum = localStorage.getItem(TURNTABLE_STORAGE_KEY);
-    const savedAdminMode = localStorage.getItem(ADMIN_STORAGE_KEY);
+    // const savedAdminMode = localStorage.getItem(ADMIN_STORAGE_KEY);
 
     if (savedCollection) {
       setCollectionAlbums(JSON.parse(savedCollection));
@@ -36,9 +38,11 @@ export default function Home() {
     if (savedTurntableAlbum) {
       setOnTurntableAlbum(JSON.parse(savedTurntableAlbum));
     }
-    if (savedAdminMode === "true") {
-      setIsAdminMode(true);
-    }
+    
+    // if (savedAdminMode === "true") {
+    //   setIsAdminMode(true);
+    // }
+
   }, []);
   useEffect(() => {
     localStorage.setItem(ADMIN_STORAGE_KEY, String(isAdminMode));
@@ -162,6 +166,50 @@ export default function Home() {
   );
 };
 
+const handleSaveAlbum = (album: Album) => {
+  setCollectionAlbums((prevAlbums) => {
+    const exists = prevAlbums.some((item) => item.id === album.id);
+
+    if (exists) {
+      return prevAlbums.map((item) =>
+        item.id === album.id ? album : item
+      );
+    }
+
+    return [...prevAlbums, album];
+  });
+
+  setSelectedAlbum(album);
+  setEditingAlbum(null);
+  setIsAddFormOpen(false);
+};
+
+const handleEditAlbum = (album: Album) => {
+  setEditingAlbum(album);
+  setIsAddFormOpen(true);
+};
+
+const handleDeleteAlbum = (albumId: number) => {
+  const ok = window.confirm("이 앨범을 삭제할까요?");
+
+  if (!ok) return;
+
+  setCollectionAlbums((prevAlbums) =>
+    prevAlbums
+      .filter((album) => album.id !== albumId)
+      .map((album, index) => ({
+        ...album,
+        shelfOrder: index + 1,
+      }))
+  );
+
+  setSelectedAlbum(null);
+
+  setOnTurntableAlbum((prevAlbum) =>
+    prevAlbum?.id === albumId ? null : prevAlbum
+  );
+};
+
   return (
     <main className="min-h-screen bg-[#f5efe6] px-6 py-10">
       <section className="mx-auto max-w-7xl">
@@ -241,6 +289,8 @@ export default function Home() {
               onClose={() => setSelectedAlbum(null)}
               onPlaceOnTurntable={setOnTurntableAlbum}
               onUpdateMemo={handleUpdateAlbumMemo}
+              onEditAlbum={handleEditAlbum}
+              onDeleteAlbum={handleDeleteAlbum}
             />
           )}
         </div>
@@ -250,8 +300,12 @@ export default function Home() {
           nextShelfOrder={
             Math.max(...collectionAlbums.map((album) => album.shelfOrder)) + 1
           }
-          onAddAlbum={handleAddAlbum}
-          onClose={() => setIsAddFormOpen(false)}
+          initialAlbum={editingAlbum}
+          onAddAlbum={handleSaveAlbum}
+          onClose={() => {
+            setEditingAlbum(null);
+            setIsAddFormOpen(false);
+          }}
         />
       )}  
       </section>

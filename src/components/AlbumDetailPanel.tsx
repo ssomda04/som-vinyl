@@ -8,6 +8,8 @@ type AlbumDetailPanelProps = {
   onClose: () => void;
   onPlaceOnTurntable: (album: Album) => void;
   onUpdateMemo: (albumId: number, memo: string) => void;
+  onEditAlbum: (album: Album) => void;
+  onDeleteAlbum: (albumId: number) => void;
 };
 
 export default function AlbumDetailPanel({
@@ -16,6 +18,8 @@ export default function AlbumDetailPanel({
   onClose,
   onPlaceOnTurntable,
   onUpdateMemo,
+  onEditAlbum,
+  onDeleteAlbum,
 }: AlbumDetailPanelProps) {
   const [isEditingMemo, setIsEditingMemo] = useState(false);
   const [memoText, setMemoText] = useState(album.memo ?? "");
@@ -65,6 +69,26 @@ export default function AlbumDetailPanel({
         Place on Turntable
       </button>
 
+    {isAdminMode && (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+            type="button"
+            onClick={() => onEditAlbum(album)}
+            className="rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 transition hover:border-neutral-400"
+            >
+            Edit
+            </button>
+
+            <button
+            type="button"
+            onClick={() => onDeleteAlbum(album.id)}
+            className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm text-red-500 transition hover:border-red-300 hover:text-red-600"
+            >
+            Delete
+            </button>
+        </div>
+    )}
+    
       {(album.memo || isAdminMode) && (
         <div className="mt-5 rounded-xl border border-neutral-200 bg-[#f3eee4] p-4">
           <div className="mb-2 flex items-center justify-between">

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import type { Album } from "@/types/album";
+import { init } from "next/dist/compiled/webpack/webpack";
 
 type AddAlbumFormProps = {
   nextId: number;
   nextShelfOrder: number;
+  initialAlbum?: Album | null;
   onAddAlbum: (album: Album) => void;
   onClose: () => void;
 };
@@ -40,6 +42,7 @@ type DiscogsRelease = {
 export default function AddAlbumForm({
   nextId,
   nextShelfOrder,
+  initialAlbum = null,
   onAddAlbum,
   onClose,
 }: AddAlbumFormProps) {
@@ -49,12 +52,22 @@ export default function AddAlbumForm({
   );
   const [isSearching, setIsSearching] = useState(false);
 
-  const [title, setTitle] = useState("");
-  const [artist, setArtist] = useState("");
-  const [year, setYear] = useState("");
-  const [genre, setGenre] = useState("");
-  const [coverImage, setCoverImage] = useState("");
-  const [tracksText, setTracksText] = useState("");
+  const [title, setTitle] = useState(initialAlbum?.title ?? "");
+    const [artist, setArtist] = useState(initialAlbum?.artist ?? "");
+    const [year, setYear] = useState(
+    initialAlbum?.year ? String(initialAlbum.year) : ""
+    );
+    const [genre, setGenre] = useState(initialAlbum?.genre.join(", ") ?? "");
+    const [coverImage, setCoverImage] = useState(initialAlbum?.coverImage ?? "");
+    const [tracksText, setTracksText] = useState(
+    initialAlbum
+        ? Object.entries(initialAlbum.tracks)
+            .flatMap(([side, tracks]) =>
+            tracks.map((track, index) => `${side}${index + 1} ${track}`)
+            )
+            .join("\n")
+        : ""
+    );
 
 const parseTracks = (text: string) => {
   return text
@@ -146,8 +159,8 @@ const formatDiscogsTracks = (tracklist: DiscogsTrack[] = []) => {
     e.preventDefault();
 
     const newAlbum: Album = {
-      id: nextId,
-      shelfOrder: nextShelfOrder,
+      id: initialAlbum?.id ?? nextId,
+      shelfOrder: initialAlbum?.shelfOrder ?? nextShelfOrder,
       title,
       artist,
       year: Number(year),
@@ -175,7 +188,7 @@ const formatDiscogsTracks = (tracklist: DiscogsTrack[] = []) => {
               Add Vinyl
             </p>
             <h2 className="mt-2 text-2xl font-bold text-neutral-900">
-              새 LP 추가
+              {initialAlbum ? "LP 정보 수정" : "새 LP 추가"}
             </h2>
           </div>
 
@@ -283,11 +296,11 @@ const formatDiscogsTracks = (tracklist: DiscogsTrack[] = []) => {
           <textarea
             placeholder={`Tracks
 
-A1 Track title
-A2 Track title
-B1 Track title
-B2 Track title
-C1 Track title`}
+                A1 Track title
+                A2 Track title
+                B1 Track title
+                B2 Track title
+                C1 Track title`}
             value={tracksText}
             onChange={(e) => setTracksText(e.target.value)}
             className="min-h-40 w-full rounded-xl border px-4 py-3 text-sm"
@@ -298,7 +311,7 @@ C1 Track title`}
           type="submit"
           className="mt-5 w-full rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-700"
         >
-          Add to Shelf
+          {initialAlbum ? "Save Changes" : "Add to Shelf"}
         </button>
       </form>
     </div>
