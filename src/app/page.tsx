@@ -106,30 +106,52 @@ export default function Home() {
     return copiedAlbums;
   }, [filteredAlbums, sortOption]);
 
-const handleReorderAlbums = async (activeId: number, overId: number) => {
-  const oldIndex = collectionAlbums.findIndex((album) => album.id === activeId);
-  const newIndex = collectionAlbums.findIndex((album) => album.id === overId);
+  const handleReorderAlbums = async (
+    activeId: number,
+    overId: number
+  ) => {
+    const oldIndex = collectionAlbums.findIndex(
+      (album) => album.id === activeId
+    );
 
-  if (oldIndex === -1 || newIndex === -1) return;
+    const newIndex = collectionAlbums.findIndex(
+      (album) => album.id === overId
+    );
 
-  const reorderedAlbums = arrayMove(collectionAlbums, oldIndex, newIndex).map(
-    (album, index) => ({
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reorderedAlbums = arrayMove(
+      collectionAlbums,
+      oldIndex,
+      newIndex
+    ).map((album, index) => ({
       ...album,
       shelfOrder: index + 1,
-    })
-  );
+    }));
 
-  setCollectionAlbums(reorderedAlbums);
+    setCollectionAlbums(reorderedAlbums);
 
-  const updates = reorderedAlbums.map((album) =>
-    supabase
-      .from("albums")
-      .update({ shelf_order: album.shelfOrder })
-      .eq("id", album.id)
-  );
-
-  await Promise.all(updates);
-};
+    try {
+      await Promise.all(
+        reorderedAlbums.map(async (album) => {
+          await fetch("/api/admin/albums", {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "x-admin-password": adminPassword,
+            },
+            body: JSON.stringify({
+              id: album.id,
+              shelf_order: album.shelfOrder,
+            }),
+          });
+        })
+      );
+    } catch (error) {
+      console.error(error);
+      alert("순서 저장에 실패했어요.");
+    }
+  };
 
   const handleAdminAccess = async () => {
     if (isAdminMode) {
